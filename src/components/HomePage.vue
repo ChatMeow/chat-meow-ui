@@ -6,19 +6,14 @@
           <template #header>
             <div>
               <span>音频设置</span>
-              <el-button class="submit-button" text>提交修改</el-button>
             </div>
           </template>
           <el-row class="p-10">
             <el-col class="select-label" :span="24" :sm="6">音色模型</el-col>
             <el-col :span="24" :sm="18">
-              <el-select @change="confChange(3, 0)" v-model="selectDataList[0].value" class="w-100" placeholder="Select" size="large">
-                <el-option
-                    v-for="item in options"
-                    :key="item.value"
-                    :label="item.label"
-                    :value="item.value"
-                />
+              <el-select @change="confChange(3, 0)" v-model="selectDataList[0].value" class="w-100" placeholder="Select"
+                size="large">
+                <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value" />
               </el-select>
             </el-col>
           </el-row>
@@ -26,7 +21,7 @@
             <el-col class="select-label" :span="24" :sm="6">{{ item.label }}</el-col>
             <el-col :span="24" :sm="18">
               <el-slider @change="confChange(0, index)" v-model="item.value" :min="item.min" :max="item.max"
-                         class="w-100" :step="item.step" :disabled="item.disabled" show-stops show-input/>
+                class="w-100" :step="item.step" :disabled="item.disabled" show-stops show-input />
             </el-col>
           </el-row>
         </el-card>
@@ -36,19 +31,13 @@
           <template #header>
             <div>
               <span>对话设置</span>
-              <el-button class="button" text>提交修改</el-button>
             </div>
           </template>
           <el-row v-for="(item, index) in defaultPrompt" :key="index" class="p-10">
             <el-col class="select-label" :span="24" :sm="6">{{ item.label }}</el-col>
             <el-col :span="24" :sm="18">
-              <el-input
-                  @change="confChange(2, index)"
-                  v-model="item.value"
-                  autosize
-                  type="textarea"
-                  placeholder="Please input"
-              />
+              <el-input @change="confChange(2, index)" v-model="item.value" autosize type="textarea"
+                placeholder="Please input" />
             </el-col>
           </el-row>
 
@@ -56,10 +45,22 @@
             <el-col class="select-label" :span="24" :sm="6">{{ item.label }}</el-col>
             <el-col :span="24" :sm="18">
               <el-slider @change="confChange(1, index)" v-model="item.value" :min="item.min" :max="item.max"
-                         class="w-100" :step="item.step" :disabled="item.disabled" show-stops show-input/>
+                class="w-100" :step="item.step" :disabled="item.disabled" show-stops show-input />
             </el-col>
           </el-row>
         </el-card>
+
+        <el-card class="box-card">
+          <template #header>
+            <div>
+              <span>状态检测: {{ status_txt }}</span>
+            </div>
+          </template>
+          <el-button class="button" type="danger" :disabled="!chatStatus" @click="stopChat" plain>关闭对话</el-button>
+          <el-button class="button" type="primary" :disabled="chatStatus" @click="startChat" plain>启动对话</el-button>
+        </el-card>
+
+
       </el-col>
     </el-row>
 
@@ -69,6 +70,8 @@
 
 <script>
 import axios from 'axios'
+import { h } from 'vue'
+import { ElNotification } from 'element-plus'
 
 export default {
   data() {
@@ -109,13 +112,13 @@ export default {
         {
           value: 110,
           label: '度小童',
-        },{
+        }, {
           value: 111,
           label: '度小萌',
-        },{
+        }, {
           value: 103,
           label: '度米朵',
-        },{
+        }, {
           value: 5,
           label: '度小娇',
         }
@@ -229,21 +232,58 @@ export default {
 
         }
       ],
-      selectDataList:[
+      selectDataList: [
         {
           'value': 4,
           'handler': 'baidu',
           'name': 'per',
           'disabled': false
         }
-      ]
-
+      ],
+      status_txt: '',
+      chatStatus: false
     }
   },
   mounted() {
     this.initConfig()
+    this.timer = setInterval(this.get_status, 1000)
+  },
+  beforeUnmount() {
+    clearInterval(this.timer)
   },
   methods: {
+    startChat() {
+      axios.get('/start_chat').then(res => {
+        if (res.status === 200) {
+          ElNotification({
+            title: '启动',
+            message: h('i', { style: 'color: teal' }, '已发送启动命令'),
+          })
+        }
+      })
+    },
+    stopChat() {
+      axios.get('/stop_chat').then(res => {
+        if (res.status === 200) {
+          ElNotification({
+            title: '停止',
+            message: h('i', { style: 'color: teal' }, '已发送停止命令'),
+          })
+        }
+      })
+    },
+
+    get_status() {
+      axios.get('/chat_status').then(res => {
+        if (res.data['status'] === 0) {
+          this.status_txt = '运行'
+          this.chatStatus = true
+        } else {
+          this.status_txt = '停止'
+          this.chatStatus = false
+        }
+      })
+    },
     initConfig() {
       axios.get('/get_config').then((response) => {
         console.log(response.data)
@@ -274,9 +314,9 @@ export default {
       let dataList = []
       if (type === 0) {
         dataList = this.audioConfigList
-      } else if(type ===1) {
+      } else if (type === 1) {
         dataList = this.openaiConfigList
-      } else if(type === 2){
+      } else if (type === 2) {
         dataList = this.defaultPrompt
       } else {
         dataList = this.selectDataList
@@ -298,12 +338,12 @@ export default {
         }
       }
       axios.post(
-          '/set_config',
-          {
-            handler: handler,
-            name: name,
-            value: value
-          }
+        '/set_config',
+        {
+          handler: handler,
+          name: name,
+          value: value
+        }
       ).then((response) => {
         dataList[index].disabled = false
         console.log(response.data)
