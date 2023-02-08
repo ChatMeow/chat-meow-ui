@@ -126,10 +126,10 @@ export default {
       audioConfigList: [
         {
           'label': '触发阈值',
-          'min': 100,
-          'max': 10000,
+          'min': 1000,
+          'max': 50000,
           'value': 1000,
-          'step': 100,
+          'step': 500,
           'handler': 'audio',
           'name': 'audio_min_rms',
           'disabled': false
