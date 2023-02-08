@@ -50,7 +50,7 @@
           </el-row>
         </el-card>
 
-        <el-card class="box-card">
+        <el-card style="margin-top: 20px;" class="box-card">
           <template #header>
             <div>
               <span>状态检测: {{ status_txt }}</span>
@@ -241,7 +241,8 @@ export default {
         }
       ],
       status_txt: '',
-      chatStatus: false
+      chatStatus: false,
+      lastMsg: '',
     }
   },
   mounted() {
@@ -272,15 +273,32 @@ export default {
         }
       })
     },
-
     get_status() {
       axios.get('/chat_status').then(res => {
+        console.log(res.data)
         if (res.data['status'] === 0) {
           this.status_txt = '运行'
           this.chatStatus = true
         } else {
           this.status_txt = '停止'
           this.chatStatus = false
+        }
+        if (res.data['msg'] !== '') {
+          if (res.data['msg'] === this.lastMsg) {
+            return
+          }
+          this.lastMsg = res.data['msg']
+          if (res.data['msg'][0] === '你') {
+            ElNotification({
+              title: '你说',
+              message: h('i', { style: 'color: CornflowerBlue' }, res.data['msg'].slice(3)),
+            })
+          } else if (res.data['msg'][0] === '猫') {
+            ElNotification({
+              title: '猫猫说',
+              message: h('i', { style: 'color: OliveDrab' }, res.data['msg'].slice(4)),
+            })
+          }
         }
       })
     },
@@ -363,11 +381,30 @@ export default {
   padding: 2%;
 }
 
-.main-box {
-  text-align: left;
-  padding-right: 10%;
-  padding-left: 10%;
+@media (max-width: 768px) {
+  .main-box {
+    text-align: left;
+    padding-right: 10%;
+    padding-left: 10%;
+  }
 }
+
+
+@media (min-width: 768px) {
+  .main-box {
+    text-align: left;
+    padding-right: 10%;
+    padding-left: 10%;
+  }
+}
+@media (max-width: 769px) {
+  .main-box {
+    text-align: left;
+    padding-right: 0;
+    padding-left: 0;
+  }
+}
+
 
 
 .box-card {
