@@ -6,20 +6,18 @@
  * @FilePath: /ChatMeowc:/Users/ijink/Project/Ai/chatmeowui/src/App.vue
 -->
 <template>
-  <!-- 感谢API提供 拉菲艾拉La_Pluma-->
-  <img alt="" src="https://www.adorable0v0.top/api">
-  <HomePage/>
+  <HomePage />
 </template>
 
 <script>
-import HomePage from './components/HomePage.vue'
+import HomePage from "./components/HomePage.vue";
 
 export default {
-  name: 'App',
+  name: "App",
   components: {
-    HomePage
-  }
-}
+    HomePage,
+  },
+};
 </script>
 
 <style>
@@ -32,7 +30,7 @@ export default {
   margin-top: 20px;
 }
 
-img{
+img {
   height: 200px;
 }
 </style>
