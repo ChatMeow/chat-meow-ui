@@ -138,6 +138,14 @@
             plain
             >启动对话</el-button
           >
+          <el-button
+            class="button"
+            type="primary"
+            :disabled="chatStatus"
+            @click="clearChat"
+            plain
+            >清除记忆</el-button
+          >
         </el-card>
       </el-col>
     </el-row>
@@ -188,6 +196,10 @@ export default {
         {
           value: 5,
           label: "[百度]度小娇",
+        },
+        {
+          value: 10001,
+          label: "[VIST]纳西妲(不支持该设备)",
         },
       ],
       audioConfigList: [
@@ -327,6 +339,16 @@ export default {
           ElNotification({
             title: "停止",
             message: h("i", { style: "color: teal" }, "已发送停止命令"),
+          });
+        }
+      });
+    },
+    clearChat() {
+      axios.get("/clear_chat").then((res) => {
+        if (res.status === 200) {
+          ElNotification({
+            title: "清除",
+            message: h("i", { style: "color: teal" }, "已发送清除命令"),
           });
         }
       });
